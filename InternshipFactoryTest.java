@@ -1,8 +1,8 @@
-package za.ac.cput.test;
+package za.ac.cput.factory;
 
 /*
 Internship.java
-Internship Factory Test
+InternshipFactoryTest
 Author: Refilwe Mabena (231013051)
 Date: 14 March 2026
 */
