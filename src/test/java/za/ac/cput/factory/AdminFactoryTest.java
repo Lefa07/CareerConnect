@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * AdminFactoryTest.java
- * Test class for ProfileFactory
+ * Test class for AdminFactory
  * Author: Magdeline Malahlela (240281721)
  * Date: 19 March 2026
  */

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * AdminRepositoryImpl.java
+ * AdminRepository.java
  * Admin repository implementation class
  * Author: Magdeline Malahlela (240281721)
  * Date: 21 March 2026

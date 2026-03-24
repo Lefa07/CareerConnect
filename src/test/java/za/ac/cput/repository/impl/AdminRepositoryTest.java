@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /*
  *  AdminRepositoryImplTest.java
- * Test class for ProfileRepositoryImpl
+ * Test class for AdminRespositoryyImpl
  * Author:  Magdeline Malahlela (240281721)
  * Date: 21 March 2026
  */
