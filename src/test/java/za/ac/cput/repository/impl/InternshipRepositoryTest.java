@@ -39,17 +39,17 @@ class InternshipRepositoryTest {
         Internship read = repository.read(created.getInternshipId());
         assertNotNull(read);
     }
-
-    @Test
-    void update () {
-        Intership updatedInternship = new Internship.Builder()
-                .copy(internship)
-                .setTitle("Updated Title")
-                .build();
-
-        Internship updated = repository.update(updatedInternship);
-        assertEquals("Updated Title", updated.getTitle());
-    }
+@Test
+void update() {
+    
+    Internship created = repository.create(internship);
+    Internship updatedInternship = new Internship.Builder()
+            .copy(created)                 
+            .setTitle("Updated Title")     
+            .build();
+    Internship updated = repository.update(updatedInternship);
+    assertEquals("Updated Title", updated.getTitle());
+}
 
     @Test
     void delete() {
