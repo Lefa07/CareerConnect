@@ -14,7 +14,7 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import PostInternshipPage from './pages/PostInternshipPage';
 import NotFoundPage from './pages/NotFoundPage';
-import InternshipPage from "./pages/InternshipPage.jsx";
+import BrowseInternshipsPage from "./pages/BrowseInternshipsPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 
 export default function App() {
@@ -28,7 +28,7 @@ export default function App() {
                             {/* PUBLIC ROUTES (Anyone can view) */}
                             <Route path="/" element={<HomePage />} />
                             <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                            <Route path="/internships" element={<InternshipPage />} />
+                            <Route path="/internships" element={<BrowseInternshipsPage />} />
 
                             {/* GUEST-ONLY ROUTES (Redirects logged-in users to /) */}
                             <Route element={<PublicOnlyRoute />}>
