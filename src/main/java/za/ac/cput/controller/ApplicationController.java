@@ -20,12 +20,14 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
+    public record ApplicationRequest(String studentNumber, String internshipId) {}
+
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody Application application) {
+    public ResponseEntity<?> create(@RequestBody ApplicationRequest request) {
         try {
             Application created = applicationService.apply(
-                    application.getStudent(),
-                    application.getInternship()
+                    request.studentNumber(),
+                    request.internshipId()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
