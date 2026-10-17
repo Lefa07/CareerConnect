@@ -9,23 +9,26 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
-import za.ac.cput.domain.Student;
-import za.ac.cput.factory.StudentFactory;
+import za.ac.cput.dto.request.StudentRegistrationRequest;
+import za.ac.cput.dto.request.StudentUpdateRequest;
+import za.ac.cput.dto.response.StudentResponse;
 import za.ac.cput.service.IStudentService;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /*
  * StudentControllerTest.java
  * Student controller test class
  * Author: Ebenezer Kouakou (230480152)
- * Date: 19 June 2026
+ * Date: 17 October 2026
  */
 @WebMvcTest(StudentController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -33,79 +36,141 @@ public class StudentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @MockitoBean
     private IStudentService studentService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Student student;
+    private StudentResponse studentResponse;
 
     @BeforeEach
     void setUp() {
-        student = StudentFactory.buildStudent("230480152", "xholisa", "xholisa@gmail.com",
-                "pass123");
+        studentResponse = new StudentResponse("230480152", "xholisa", "230480152@mycput.ac.za");
     }
 
     @Test
-    void create_Success()  throws Exception {
-        when(studentService.create(any(Student.class))).thenReturn(student);
+    void create_Success() throws Exception {
+        StudentRegistrationRequest request = new StudentRegistrationRequest(
+                "230480152", "xholisa", "pass123", "pass123"
+        );
+
+        when(studentService.create(any(StudentRegistrationRequest.class))).thenReturn(studentResponse);
+
         mockMvc.perform(post("/api/student/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(student)))
-                .andExpect(status().isOk());
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.studentNumber").value("230480152"))
+                .andExpect(jsonPath("$.name").value("xholisa"))
+                .andExpect(jsonPath("$.email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$.password").doesNotExist());
 
-        verify(studentService, times(1)).create(any(Student.class));
+        verify(studentService, times(1)).create(any(StudentRegistrationRequest.class));
     }
 
     @Test
-    void read_Success()  throws Exception {
-        when(studentService.read(anyString())).thenReturn(student);
-        mockMvc.perform(get("/api/student/read/" + student.getStudentNumber()))
-                .andExpect(status().isOk());
-        verify(studentService, times(1)).read(anyString());
+    void read_Success() throws Exception {
+        when(studentService.read("230480152")).thenReturn(studentResponse);
+
+        mockMvc.perform(get("/api/student/read/230480152"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.studentNumber").value("230480152"))
+                .andExpect(jsonPath("$.name").value("xholisa"))
+                .andExpect(jsonPath("$.email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+
+        verify(studentService, times(1)).read("230480152");
     }
 
     @Test
-    void update_Success()  throws Exception {
-        when(studentService.update(any(Student.class))).thenReturn(student);
-        mockMvc.perform(put("/api/student/update")
+    void update_Success() throws Exception {
+        StudentUpdateRequest updateRequest = new StudentUpdateRequest("Peter", "peter@gmail.com");
+        StudentResponse updatedResponse = new StudentResponse("230480152", "Peter", "peter@gmail.com");
+
+        when(studentService.update(eq("230480152"), any(StudentUpdateRequest.class))).thenReturn(updatedResponse);
+
+        mockMvc.perform(put("/api/student/update/230480152")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(student)))
-                .andExpect(status().isOk());
-        verify(studentService, times(1)).update(any(Student.class));
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.studentNumber").value("230480152"))
+                .andExpect(jsonPath("$.name").value("Peter"))
+                .andExpect(jsonPath("$.email").value("peter@gmail.com"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+
+        verify(studentService, times(1)).update(eq("230480152"), any(StudentUpdateRequest.class));
     }
 
     @Test
-    void delete_Success()  throws Exception {
-        when(studentService.delete(anyString())).thenReturn(true);
-        mockMvc.perform(delete("/api/student/delete/" + student.getStudentNumber()))
-                .andExpect(status().isOk());
-        verify(studentService, times(1)).delete(anyString());
+    void delete_Success() throws Exception {
+        when(studentService.delete("230480152")).thenReturn(true);
+
+        mockMvc.perform(delete("/api/student/delete/230480152"))
+                .andExpect(status().isNoContent());
+
+        verify(studentService, times(1)).delete("230480152");
     }
 
     @Test
-    void getAll_Success()  throws Exception {
+    void getAll_Success() throws Exception {
+        when(studentService.getAll()).thenReturn(List.of(studentResponse));
+
         mockMvc.perform(get("/api/student/getAll"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].studentNumber").value("230480152"))
+                .andExpect(jsonPath("$[0].name").value("xholisa"))
+                .andExpect(jsonPath("$[0].email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$[0].password").doesNotExist());
+
         verify(studentService, times(1)).getAll();
     }
 
     @Test
-    void getStudentByEmail_Success()  throws Exception {
-        when(studentService.getStudentByEmail(anyString())).thenReturn(Optional.of(student));
+    void getStudentByEmail_Success() throws Exception {
+        when(studentService.getStudentByEmail("230480152@mycput.ac.za")).thenReturn(Optional.of(studentResponse));
+
         mockMvc.perform(get("/api/student/getByEmail")
-                        .param("email", student.getEmail()))
-                .andExpect(status().isOk());
-        verify(studentService, times(1)).getStudentByEmail(anyString());
+                .param("email", "230480152@mycput.ac.za"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.studentNumber").value("230480152"))
+                .andExpect(jsonPath("$.name").value("xholisa"))
+                .andExpect(jsonPath("$.email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+
+        verify(studentService, times(1)).getStudentByEmail("230480152@mycput.ac.za");
     }
 
     @Test
-    void getStudentsByName_Success()  throws Exception {
-        when(studentService.getStudentsByName(anyString())).thenReturn(List.of(student));
+    void getStudentsByName_Success() throws Exception {
+        when(studentService.getStudentsByName("xholisa")).thenReturn(List.of(studentResponse));
+
         mockMvc.perform(get("/api/student/getByName")
-                .param("name", student.getName()))
-                .andExpect(status().isOk());
-        verify(studentService, times(1)).getStudentsByName(anyString());
+                .param("name", "xholisa"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].studentNumber").value("230480152"))
+                .andExpect(jsonPath("$[0].name").value("xholisa"))
+                .andExpect(jsonPath("$[0].email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$[0].password").doesNotExist());
+
+        verify(studentService, times(1)).getStudentsByName("xholisa");
+    }
+
+    @Test
+    void login_Success() throws Exception {
+        StudentController.LoginRequest loginRequest = new StudentController.LoginRequest("230480152", "pass123");
+        when(studentService.authenticate("230480152", "pass123")).thenReturn(studentResponse);
+
+        mockMvc.perform(post("/api/student/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.studentNumber").value("230480152"))
+                .andExpect(jsonPath("$.name").value("xholisa"))
+                .andExpect(jsonPath("$.email").value("230480152@mycput.ac.za"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+
+        verify(studentService, times(1)).authenticate("230480152", "pass123");
     }
 }
