@@ -26,11 +26,11 @@ public class Application {
     @Column(name = "date_applied",  nullable = false)
     private LocalDateTime dateApplied;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "student_number", nullable = false)
     private Student student;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "internship_id", nullable = false)
     private Internship internship;
 
